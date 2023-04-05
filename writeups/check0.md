@@ -3,7 +3,7 @@ Checkpoint 0 Writeup
 
 My name: Zixuan Xu
 
-My SUNet ID: [your sunetid here]
+My SUNet ID: zixuanxu
 
 I collaborated with: [list sunetids here]
 
