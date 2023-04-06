@@ -1,9 +1,11 @@
 #pragma once
 
+#include <cstdint>
 #include <queue>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <vector>
 
 class Reader;
 class Writer;
@@ -13,7 +15,10 @@ class ByteStream
 protected:
   uint64_t capacity_;
   // Please add any additional state to the ByteStream here, and not to the Writer and Reader interfaces.
-
+  std::string data_;
+  bool is_closed_;
+  bool if_error_;
+  std::string buffer_;
 public:
   explicit ByteStream( uint64_t capacity );
 
