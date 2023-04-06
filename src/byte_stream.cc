@@ -7,19 +7,21 @@
 
 using namespace std;
 
-ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ), is_closed_(false), if_error_(false), buffer_(""), cnt(0) {}
+ByteStream::ByteStream( uint64_t capacity )
+  : capacity_( capacity )
+{}
 
-void Writer::push( string data )
+void Writer::push( string data ) 
 {
   // Your code here.
-  uint64_t r_capacity = available_capacity();
-  if (r_capacity >= data.length()){
+  const uint64_t r_capacity = available_capacity();
+  if ( r_capacity >= data.length() ) {
     // data_ += data;
     buffer_ += data;
     cnt += data.length();
-  }else{
+  } else {
     // data_.append(data, 0, r_capacity);
-    buffer_.append(data, 0, r_capacity);
+    buffer_.append( data, 0, r_capacity );
     cnt += r_capacity;
   }
 }
@@ -45,7 +47,7 @@ bool Writer::is_closed() const
 uint64_t Writer::available_capacity() const
 {
   // Your code here.
-  uint64_t remain  = capacity_ - buffer_.length();
+  const uint64_t remain = capacity_ - buffer_.length();
   return remain;
 }
 
@@ -59,7 +61,7 @@ uint64_t Writer::bytes_pushed() const
 string_view Reader::peek() const
 {
   // Your code here.
-  string_view view(buffer_.c_str(), buffer_.length());
+  const string_view view( buffer_.c_str(), buffer_.length() );
   return view;
 }
 
@@ -83,9 +85,9 @@ void Reader::pop( uint64_t len )
   //   pop_len = buffer_.length() - len;
   // }
   // buffer_ = buffer_.substr(len, pop_len);
-  
+
   // modified according to ed discussion #94
-  buffer_.erase(0, len);
+  buffer_.erase( 0, len );
 }
 
 uint64_t Reader::bytes_buffered() const
