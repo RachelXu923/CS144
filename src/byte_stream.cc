@@ -13,9 +13,9 @@ void Writer::push( string data )
 {
   // Your code here.
   uint64_t r_capacity = available_capacity();
-  if (r_capacity == 0){
-    return;
-  }
+  // if (r_capacity == 0){
+  //   return;
+  // }
   if (r_capacity >= data.length()){
     data_ += data;
     buffer_ += data;
@@ -46,7 +46,8 @@ bool Writer::is_closed() const
 uint64_t Writer::available_capacity() const
 {
   // Your code here.
-  return capacity_ - buffer_.length();
+  uint64_t remain  = capacity_ - buffer_.length();
+  return remain;
 }
 
 uint64_t Writer::bytes_pushed() const
@@ -58,11 +59,11 @@ uint64_t Writer::bytes_pushed() const
 string_view Reader::peek() const
 {
   // Your code here.
-  uint64_t len = 0;
-  if (buffer_.length() != 0){
-    len = 1;
+  uint64_t p_len = 0;
+  if(buffer_.length() > 0){
+    p_len = 1;
   }
-  string_view view(buffer_.c_str(), len);
+  string_view view(buffer_.c_str(), p_len);
   return view;
 }
 
@@ -85,7 +86,7 @@ void Reader::pop( uint64_t len )
   if(len < buffer_.length()){
     pop_len = buffer_.length() - len;
   }
-  buffer_.substr(len, pop_len);
+  buffer_ = buffer_.substr(len, pop_len);
 }
 
 uint64_t Reader::bytes_buffered() const

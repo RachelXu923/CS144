@@ -4,6 +4,7 @@
 #include "common.hh"
 
 #include <concepts>
+#include <iostream>
 #include <optional>
 #include <utility>
 
