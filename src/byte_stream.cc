@@ -59,11 +59,11 @@ uint64_t Writer::bytes_pushed() const
 string_view Reader::peek() const
 {
   // Your code here.
-  uint64_t p_len = 0;
-  if(buffer_.length() > 0){
-    p_len = 1;
-  }
-  string_view view(buffer_.c_str(), p_len);
+  // uint64_t p_len = 0;
+  // if(buffer_.length() > 0){
+  //   p_len = 1;
+  // }
+  string_view view(buffer_.c_str(), buffer_.length());
   return view;
 }
 
@@ -98,5 +98,6 @@ uint64_t Reader::bytes_buffered() const
 uint64_t Reader::bytes_popped() const
 {
   // Your code here.
+  
   return data_.length() - buffer_.length();
 }
