@@ -7,11 +7,15 @@ My SUNet ID: zixuanxu
 
 I collaborated with: [list sunetids here]
 
-I would like to credit/thank these classmates for their help: [list sunetids here]
+I would like to credit/thank these classmates for their help: 
 
-This lab took me about [n] hours to do. I [did/did not] attend the lab session.
+1. runqiuzhang
+2. ed discussion #94, help me modify my pop method! And my speed improve from 0.98 Gbit/s to 1.88 Gbit/s
 
-My secret code from section 2.1 was: [code here]
+
+This lab took me about 8 hours to do. I did attend the lab session.
+
+My secret code from section 2.1 was: 759325
 
 - Optional: I had unexpected difficulty with: [describe]
 
