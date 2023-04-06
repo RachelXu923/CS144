@@ -9,17 +9,17 @@ I collaborated with: [list sunetids here]
 
 I would like to credit/thank these classmates for their help: 
 
-1. runqiuzhang
-2. ed discussion #94, help me modify my pop method! And my speed improve from 0.98 Gbit/s to 1.88 Gbit/s
+1. rqzhang: help me fix the timeout error in testing the bytestream. We also discussed approaches and datastructures we used. 
+2. Ed discussion #94: I modified my pop method after reading this discussion and improve the speed. 
 
 
 This lab took me about 8 hours to do. I did attend the lab session.
 
 My secret code from section 2.1 was: 759325
 
-- Optional: I had unexpected difficulty with: [describe]
+- Optional: I had unexpected difficulty with: Git settings; Unfamiliar with C++
 
-- Optional: I think you could make this lab better by: [describe]
+- Optional: I think you could make this lab better by: briefly introduce the background info we need to know about the lab assignment. 
 
 - Optional: I was surprised by: [describe]
 
