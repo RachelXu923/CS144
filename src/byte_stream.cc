@@ -14,7 +14,10 @@ ByteStream::ByteStream( uint64_t capacity )
 void Writer::push( string data ) 
 {
   // Your code here.
+
+  // check the remaining capacity
   const uint64_t r_capacity = available_capacity();
+  // if space is not enought, only push part of the data to the end of buffer
   if ( r_capacity >= data.length() ) {
     // data_ += data;
     buffer_ += data;
