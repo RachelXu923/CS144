@@ -12,10 +12,12 @@ I would like to credit/thank these classmates for their help:
 1. rqzhang: help me fix the timeout error in testing the bytestream. We also discussed approaches and datastructures we used. 
 2. Ed discussion #94: I modified my pop method after reading this discussion and improve the speed. 
 
-
 This lab took me about 8 hours to do. I did attend the lab session.
 
 My secret code from section 2.1 was: 759325
+
+Discussion about bytestream: 
+    I use a simple string to store the "buffer" data. Therefore my approach is very easy to implement. Just make sure your "buffer" string length is always no larger than the capacity. However, one of its drawback is it is much slower than using other data structure such as queue. 
 
 - Optional: I had unexpected difficulty with: Git settings; Unfamiliar with C++
 
