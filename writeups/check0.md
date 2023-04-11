@@ -25,4 +25,4 @@ Discussion about bytestream:
 
 - Optional: I was surprised by: [describe]
 
-- Optional: I'm not sure about: [describe]
+- Optional: I'm not sure about: My Bytestream speed is about 1.6Gbit/s, not sure if this is enough for further implementation. 
