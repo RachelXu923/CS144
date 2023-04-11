@@ -2,7 +2,11 @@
 
 #include "byte_stream.hh"
 
+#include <chrono>
+#include <cstdint>
 #include <string>
+#include <map>
+#include <sys/types.h>
 
 class Reassembler
 {
@@ -31,4 +35,12 @@ public:
 
   // How many bytes are stored in the Reassembler itself?
   uint64_t bytes_pending() const;
+  explicit Reassembler(uint64_t capacity);
+
+protected:
+  uint64_t _capacity;
+  uint64_t _head = 0;
+  uint64_t _end = 0;
+  uint64_t _pending_cnt = 0;
+  std::map<int, std::string> _map = {};
 };
