@@ -42,5 +42,5 @@ protected:
   uint64_t _head = 0;
   uint64_t _end = 0;
   uint64_t _pending_cnt = 0;
-  std::map<int, std::string> _map = {};
+  std::map<int, std::string> _buffer = {};
 };
