@@ -47,4 +47,5 @@ protected:
   void merge_string(uint64_t first_index, std::string data);
   bool _eof = false;
   void map_insert(uint64_t first_index, std::string data);
+  void merge_helper(uint64_t first_index, std::string data, auto left);
 };
