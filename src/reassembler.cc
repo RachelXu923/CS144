@@ -46,14 +46,7 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     //truncate head
     data.erase(0, _tail - first_index);
     first_index = _tail;
-    //merge check
-    // auto iter = _map.upper_bound(_tail);
-    // if (iter != _map.end() && iter->first > last_index){
-    //   output.push(data);
-    //   _tail += data.length();
-    // }else{
-      merge_string(first_index, data);
-    // }
+    merge_string(first_index, data);
   }else{
     merge_string(first_index, data);
   }
@@ -65,11 +58,6 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     _pending_cnt -= iter->second.length();
     _map.erase(iter++);
   }
-  // while (iter->first == _tail){
-  //   output.push(iter->second);
-  //   _tail += iter->second.length();
-  //   iter++;
-  // }
   if(is_last_substring){
     _eof = true;
   }
@@ -77,10 +65,138 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     output.close();
   }
 }
-
+void Reassembler::map_insert(uint64_t first_index, string data){
+  if (data.length() >=1){
+    _map[first_index] = data;
+    // cout <<"insert: " << data<<" at idx " << first_index << endl;
+    _pending_cnt += data.length();
+  }
+}
 void Reassembler::merge_string(uint64_t first_index, string data){
   // //manage bytes pending
-  // // auto iter = _map.upper_bound(first_index);
+
+  if (_map.empty()){
+    map_insert(first_index, data);
+    return;
+  }
+  uint64_t last_index = first_index + data.length();
+  auto left = _map.lower_bound(first_index);
+  if(left == _map.begin()){
+    cout << "begin case" << endl;
+    if (last_index <= left->first){
+      cout << "no overlap" << endl;
+      map_insert(first_index, data);
+    }else if (last_index > left->first && last_index < left->first + left->second.length()){
+      cout << "truncate tail" << endl;
+      uint64_t len = last_index - left->first;
+      uint64_t pos = data.length() - len;
+      data.erase(pos, len);
+      map_insert(first_index, data);
+      return;
+    }else{
+      while (left != _map.end() && last_index >= left->first + left->second.length() ){
+        cout<<"map erase: " << left->first << endl;
+        _pending_cnt -= left->second.length();
+        _map.erase(left++);
+      }
+      if(left == _map.end()){
+        map_insert(first_index, data);
+      }else{
+        if (left->first >= first_index + data.length()){
+          cout <<"no overlap after while" << endl;
+          map_insert(first_index, data);
+        }else{
+          uint64_t len = last_index - left->first;
+          uint64_t pos = data.length() - len;
+          data.erase(pos, len);
+          map_insert(first_index, data);
+        }
+      }
+    }
+  }else if(left == _map.end()){
+    cout << "end case" << endl;
+    left--;
+    uint64_t r_idx = left->first + left->second.length();
+    if(r_idx <= first_index){
+      cout << "no overlap" << endl;
+      map_insert(first_index, data);
+    }else if(r_idx > first_index && r_idx <= last_index){
+      cout << "truncate head" << endl;
+      //need to truncate 
+      uint64_t len = r_idx - first_index;
+      data.erase(0, len);
+      map_insert(r_idx, data);
+      return;
+    }
+  }else{
+    cout << "middle case" << endl;
+    // cout << "found lower bound: " << left->first<< endl;
+    left--;
+    if (left->first + left->second.length() > first_index){
+      cout << "truncate head" << endl;
+      cout << "left index: " << left->first<<"; length: " << left->second.length() << endl;
+      cout << "first index: " << first_index<<"; length: " << data.length() << endl;
+      uint64_t len = left->first + left->second.length() - first_index;
+      cout << "len: "<< len << endl;
+      data.erase(0, len);
+      first_index += len;
+    }
+    left++;
+    while (left != _map.end() && left->first + left->second.length() <= first_index + data.length()){
+      cout<< "erase at index:" << left->first << endl;
+      _pending_cnt -= left->second.length();
+      _map.erase(left++);
+    }
+    if(left == _map.end()){
+      map_insert(first_index, data);
+    }else{
+      if (left->first >= first_index + data.length()){
+        cout <<"no overlap after while" << endl;
+        map_insert(first_index, data);
+      }else{
+        cout<< "truncate tail" << endl;
+        cout << "left index: " << left->first<<"; length: " << left->second.length() << endl;
+        cout << "first index: " << first_index<<"; length: " << data.length() << endl;
+        uint64_t len = first_index + data.length() - left->first;
+        cout << "len: "<< len << endl;
+        uint64_t pos = data.length() - len;
+        cout << "pos: " << pos << endl;
+        data.erase(pos, len);
+        map_insert(first_index, data);
+      }
+    }
+  }
+
+
+
+  // if (left != _map.begin()){
+  //   left--;
+  // }
+  // if (left->first + left->second.length() > l){
+  //   left->second.erase(first_index - left->first, left->first + left->second.length() - first_index);
+  //   _pending_cnt -= left->first + left->second.length() - first_index;
+  // }
+  // left ++;
+  // while (left != _map.end() && left->first + left->second.length() <= r){
+  //   _pending_cnt -= left->second.length();
+  //   _map.erase(left);
+  //   left = _map.lower_bound(l);
+  // }
+
+  // if (left != _map.end() && left->first < r){
+  //   _map[r] = left->second.erase(0, r - left->first);
+  //   _pending_cnt += _map[r].length();
+  //   _map.erase(left);
+  //   _pending_cnt -= left->second.length();
+  // }
+
+  // if (data.length() > 0){
+  //   _map[first_index] = data;
+  //   // _map.insert(map<uint64_t, string>::value_type(first_index, data));
+  //   _pending_cnt += data.length();
+  // }
+
+    // // auto iter = _map.upper_bound(first_index);
   // uint64_t last_index = first_index +data.length();
   // //data'index is largest
   // if (_map.upper_bound(first_index) == _map.end()){
@@ -103,38 +219,6 @@ void Reassembler::merge_string(uint64_t first_index, string data){
   //   if(left->first != right->first){
       
   //   }
-
-
-
-  uint64_t l = first_index;
-  uint64_t r = first_index + data.length();
-  auto left = _map.lower_bound(l);
-  if (left != _map.begin()){
-    left--;
-  }
-  if (left->first + left->second.length() > l){
-    left->second.erase(first_index - left->first, left->first + left->second.length() - first_index);
-    _pending_cnt -= left->first + left->second.length() - first_index;
-  }
-  left ++;
-  while (left != _map.end() && left->first + left->second.length() <= r){
-    _pending_cnt -= left->second.length();
-    _map.erase(left);
-    left = _map.lower_bound(l);
-  }
-
-  if (left != _map.end() && left->first < r){
-    _map[r] = left->second.erase(0, r - left->first);
-    _pending_cnt += _map[r].length();
-    _map.erase(left);
-    _pending_cnt -= left->second.length();
-  }
-
-  if (data.length() > 0){
-    _map[first_index] = data;
-    // _map.insert(map<uint64_t, string>::value_type(first_index, data));
-    _pending_cnt += data.length();
-  }
 }
 
 uint64_t Reassembler::bytes_pending() const

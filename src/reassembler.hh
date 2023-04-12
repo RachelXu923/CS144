@@ -46,4 +46,5 @@ protected:
   std::map<uint64_t, std::string> _map = {};
   void merge_string(uint64_t first_index, std::string data);
   bool _eof = false;
+  void map_insert(uint64_t first_index, std::string data);
 };
