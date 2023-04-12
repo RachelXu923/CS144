@@ -31,16 +31,19 @@ public:
    *
    * The Reassembler should close the stream after writing the last byte.
    */
+  Reassembler()= default;
+
   void insert( uint64_t first_index, std::string data, bool is_last_substring, Writer& output );
 
   // How many bytes are stored in the Reassembler itself?
   uint64_t bytes_pending() const;
-  explicit Reassembler(uint64_t capacity);
 
 protected:
-  uint64_t _capacity;
-  uint64_t _head = 0;
-  uint64_t _end = 0;
+  // uint64_t _capacity;
+  uint64_t _tail = 0;
+  // uint64_t _end = 0;
   uint64_t _pending_cnt = 0;
-  std::map<int, std::string> _buffer = {};
+  std::map<uint64_t, std::string> _map = {};
+  void merge_string(uint64_t first_index, std::string data);
+  bool _eof = false;
 };
