@@ -4,8 +4,8 @@
 
 #include <chrono>
 #include <cstdint>
-#include <string>
 #include <map>
+#include <string>
 #include <sys/types.h>
 
 class Reassembler
@@ -31,21 +31,18 @@ public:
    *
    * The Reassembler should close the stream after writing the last byte.
    */
-  Reassembler()= default;
+  Reassembler() = default;
 
   void insert( uint64_t first_index, std::string data, bool is_last_substring, Writer& output );
 
-  // How many bytes are stored in the Reassembler itself?
   uint64_t bytes_pending() const;
 
 protected:
-  // uint64_t _capacity;
-  uint64_t _tail = 0;
-  // uint64_t _end = 0;
-  uint64_t _pending_cnt = 0;
-  std::map<uint64_t, std::string> _map = {};
-  void merge_string(uint64_t first_index, std::string data);
-  bool _eof = false;
-  void map_insert(uint64_t first_index, std::string data);
-  void merge_helper(uint64_t first_index, std::string data, auto left);
+  uint64_t _tail = 0; //mark the end the buffer
+  uint64_t _pending_cnt = 0; //bytes still pending in the map, received but not written yet
+  std::map<uint64_t, std::string> _map = {}; //<key: first_index, value: data>: store the data block(key is their first index) 
+  void merge_string( uint64_t first_index, std::string data ); //merge new data block into the map
+  bool _eof = false; //mark if last string was received
+  void map_insert( uint64_t first_index, std::string data ); //insert data into the map manage pending cnt
+  void merge_helper( uint64_t first_index, std::string data, auto left ); //helper function of merge
 };
