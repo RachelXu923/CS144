@@ -28,11 +28,8 @@ void TCPReceiver::receive( TCPSenderMessage message, Reassembler& reassembler, W
     abs_seqno = message.seqno.unwrap(ISN, checkpoint);
   }
   string str = message.payload.release();
-  cout << "payload: " << str << endl;
-  cout << "abs seqno: " << abs_seqno << endl;
   reassembler.insert(abs_seqno-1, str, message.FIN, inbound_stream);
   checkpoint += str.size();
-  cout << "check point: " << checkpoint << endl;
 }
 
 TCPReceiverMessage TCPReceiver::send( const Writer& inbound_stream ) const
