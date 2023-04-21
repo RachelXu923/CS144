@@ -12,7 +12,9 @@ Wrap32 Wrap32::wrap( uint64_t n, Wrap32 zero_point )
   // Your code here.
   // (void)n;
   // (void)zero_point;
-  return zero_point.operator+(static_cast<uint32_t>(n));
+  //abs seqno(64) -> seqno(32)
+
+  return zero_point.operator+( static_cast<uint32_t>( n ) );
 }
 
 uint64_t Wrap32::unwrap( Wrap32 zero_point, uint64_t checkpoint ) const
@@ -21,28 +23,24 @@ uint64_t Wrap32::unwrap( Wrap32 zero_point, uint64_t checkpoint ) const
   // (void)zero_point;
   // (void)checkpoint;
   // return {};
-  //convert seqno(Wrap32) -> absolute seqno(uint64_t)
+  // convert seqno(Wrap32) -> absolute seqno(uint64_t)
 
-  // uint32_t q = checkpoint / (1UL << 32);
-  // uint32_t remain = checkpoint % (1UL << 32);
-  // uint32_t offset = raw_value_ - zero_point.raw_value_;
+  //distance between checkpoint and zero point
+  uint32_t check = checkpoint % ( 1UL << 32 );
+  //distance between x and zero point
+  //zero point can either on the left or right
+  uint32_t dist = raw_value_ - zero_point.raw_value_;
+  //checkpoint can either on the left or right
+  //obtained candidate seqno based on the offset
+  //the “absolute” offset between checkpoint and x equals "seqno" offset between checkpoint and x
+  uint64_t ans = checkpoint + dist - check;
 
-  // if (offset > remain && (offset - remain) > (1UL<<32) - (offset - remain) && q > 0){
-  //   q--;
-  // }
-  // if (offset < remain && (remain - offset) > (1UL<<32)-((remain - offset)) && q < UINT32_MAX){
-  //   q++;
-  // }
-  // return q*(1UL<<32) + offset;
-
-  uint32_t check = checkpoint % (1UL << 32);
-  uint32_t abs_seq = raw_value_ - zero_point.raw_value_;
-  uint64_t ans = checkpoint + abs_seq - check;
-
-  if (ans + (1UL << 32) > checkpoint && ans + (1UL<<32) - checkpoint < (check - abs_seq)){
-    ans += (1UL << 32);
-  }else if (ans - (1UL << 32) < checkpoint && checkpoint - (ans - (1UL << 32)) < (abs_seq - check)){
-    ans -= (1UL << 32);
+  //first term:handle int overflow
+  //secend term: find the closest point
+  if ( ans + ( 1UL << 32 ) > checkpoint && ans + ( 1UL << 32 ) - checkpoint < ( check - dist ) ) {
+    ans += ( 1UL << 32 );
+  } else if ( ans - ( 1UL << 32 ) < checkpoint && checkpoint - ( ans - ( 1UL << 32 ) ) < ( dist - check ) ) {
+    ans -= ( 1UL << 32 );
   }
   return ans;
 }

@@ -10,8 +10,9 @@ class TCPReceiver
 {
 protected:
   bool SYN = false;
-  Wrap32 ISN{0};
+  Wrap32 ISN { 0 };
   uint64_t checkpoint = 0;
+
 public:
   /*
    * The TCPReceiver receives TCPSenderMessages, inserting their payload into the Reassembler
