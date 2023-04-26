@@ -23,10 +23,10 @@
 
 struct TCPSenderMessage
 {
-  Wrap32 seqno { 0 };
-  bool SYN { false };
+  Wrap32 seqno { 0 }; //the initial seqno
+  bool SYN { false };//begin: the very first message SYN == true
   Buffer payload {};
-  bool FIN { false };
+  bool FIN { false };//end: when the stream is closed/finished 
 
   // How many sequence numbers does this segment use?
   size_t sequence_length() const { return SYN + payload.size() + FIN; }
