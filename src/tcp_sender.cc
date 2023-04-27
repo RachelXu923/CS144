@@ -33,19 +33,36 @@ uint64_t TCPSender::consecutive_retransmissions() const
 optional<TCPSenderMessage> TCPSender::maybe_send()
 {
   // Your code here.
-  
+  TCPSenderMessage seg;
+  if (!pending_seg_.empty()){
+    seg = pending_seg_.front();
+    cout << "send: " << seg.seqno.unwrap(isn_, next_ackno) <<endl;
+    next_ackno += seg.sequence_length();
+    sequence_number_in_flight += seg.sequence_length();
+    outstanding_seg_.push(seg);
+    pending_seg_.pop();
+    if (!is_running){
+      start_timer();
+    }
+  }
+  return seg;
 }
 
 void TCPSender::push( Reader& outbound_stream )
 {
   // Your code here.
   uint16_t cur_capacity = window_size > 0? window_size : 1;
-  while (cur_capacity > sequence_number_in_flight + pending_size && !FIN && ){
-    uint16_t payload_size = min(TCPConfig::MAX_PAYLOAD_SIZE, cur_capacity);
+  while (cur_capacity > sequence_number_in_flight + pending_size && !FIN ){
+    uint16_t payload_size = TCPConfig::MAX_PAYLOAD_SIZE;
+    if (cur_capacity < payload_size){
+      payload_size = cur_capacity;
+    }
     TCPSenderMessage seg;
     //if no SYN, add isn to syn
     if (!SYN){
+      cout << "set SYN" << endl;
       seg.SYN = true;
+      cout << seg.SYN << endl;
       SYN = true;
       payload_size --;
     }
@@ -57,7 +74,11 @@ void TCPSender::push( Reader& outbound_stream )
       seg.FIN = true;
       FIN = true;
     }
+    if (seg.sequence_length() == 0){
+      return;
+    }
     pending_seg_.push(seg);
+    next_ackno += payload_size;
     pending_size += seg.sequence_length();
   }
 }
@@ -65,19 +86,28 @@ void TCPSender::push( Reader& outbound_stream )
 TCPSenderMessage TCPSender::send_empty_message() const
 {
   // Your code here.
-  return {};
+  TCPSenderMessage seg;
+  seg.seqno = Wrap32::wrap(next_ackno, isn_);
+  return seg;
 }
 
 void TCPSender::receive( const TCPReceiverMessage& msg )
 {
   // Your code here.
+  if(!msg.ackno.has_value()){
+    cout << "ackno has no value" << endl;
+    return;
+  }
   uint64_t abs_ackno = msg.ackno->unwrap(isn_, next_ackno);
+  cout << "abs ackno" << abs_ackno << endl;
+  cout << "next ackno" << abs_ackno <<endl;
   if (abs_ackno > next_ackno){
     return;
   }
-  next_ackno = abs_ackno;
+  // next_ackno = abs_ackno;
   window_size = msg.window_size;
   while (!outstanding_seg_.empty() && outstanding_seg_.front().seqno.unwrap(isn_, next_ackno) <= next_ackno){
+    cout << "drop seg that have been acked" << endl;
     sequence_number_in_flight -= outstanding_seg_.front().sequence_length();
     outstanding_seg_.pop();
     if(is_running){
@@ -98,19 +128,27 @@ void TCPSender::tick( const size_t ms_since_last_tick )
   }else{
     start_timer();
   }
-  if (is_expire()){
+  if (is_expire() && !pending_seg_.empty()){
     //retransmit the ealiest
-    maybe_send();
+    pending_seg_.push(outstanding_seg_.front());
     if(window_size > 0){
       double_RTO();
       consecutive_retransmissions_cnt ++;
     }
     reset_timer();
   }
+  if(outstanding_seg_.empty()){
+    end_timer();
+  }
 }
 
 void TCPSender::start_timer(){
   is_running = true;
+  current_time = 0;
+  cnt = 1;
+}
+void TCPSender::end_timer(){
+  is_running = false;
   current_time = 0;
   cnt = 1;
 }

@@ -15,6 +15,11 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
   // 3. merge the data into the map
   // 4. pop the data from the map and write them into the bytestream until there's a gap in the maplist
   // 5. end of file: last string received && map is empty
+
+  if (first_index > _tail + output.available_capacity()){
+    return;
+  }
+
   uint64_t last_index = first_index + data.length();
 
   // truncate tail

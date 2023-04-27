@@ -3,6 +3,7 @@
 #include "buffer.hh"
 #include "wrapping_integers.hh"
 
+#include <iostream>
 #include <string>
 
 /*
@@ -27,7 +28,6 @@ struct TCPSenderMessage
   bool SYN { false };//begin: the very first message SYN == true
   Buffer payload {};
   bool FIN { false };//end: when the stream is closed/finished 
-
   // How many sequence numbers does this segment use?
   size_t sequence_length() const { return SYN + payload.size() + FIN; }
 };
