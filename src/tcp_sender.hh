@@ -6,6 +6,7 @@
 #include "wrapping_integers.hh"
 #include <cstddef>
 #include <cstdint>
+#include <deque>
 #include <queue>
 
 class TCPSender
@@ -37,14 +38,15 @@ public:
   uint64_t consecutive_retransmissions() const; // How many consecutive *re*transmissions have happened?
 
 private:
-  std::queue<TCPSenderMessage> outstanding_seg_{};
-  std::queue<TCPSenderMessage> pending_seg_{};
+  std::deque<TCPSenderMessage> outstanding_seg_{};
+  std::deque<TCPSenderMessage> pending_seg_{};
   bool SYN = false;
   bool FIN = false;
   uint16_t window_size = 0;
   uint64_t next_ackno = 0;
+  uint64_t sent_seqno = 0;
   uint64_t sequence_number_in_flight = 0;
-  uint64_t pending_size = 0;
+  // uint64_t pending_size = 0;
   uint64_t consecutive_retransmissions_cnt = 0;
 
   bool is_running = false;

@@ -33,34 +33,35 @@ uint64_t TCPSender::consecutive_retransmissions() const
 optional<TCPSenderMessage> TCPSender::maybe_send()
 {
   // Your code here.
-  TCPSenderMessage seg;
+  optional<TCPSenderMessage> output;
   if (!pending_seg_.empty()){
+    TCPSenderMessage seg;
     seg = pending_seg_.front();
-    cout << "send: " << seg.seqno.unwrap(isn_, next_ackno) <<endl;
+    pending_seg_.pop_front();
+    outstanding_seg_.push_back(seg);
+    // cout << "add seg to outstanding" << endl; 
+    output = seg;
     next_ackno += seg.sequence_length();
-    sequence_number_in_flight += seg.sequence_length();
-    outstanding_seg_.push(seg);
-    pending_seg_.pop();
-    if (!is_running){
-      start_timer();
-    }
   }
-  return seg;
+  return output;
 }
 
 void TCPSender::push( Reader& outbound_stream )
 {
   // Your code here.
   uint16_t cur_capacity = window_size > 0? window_size : 1;
-  while (cur_capacity > sequence_number_in_flight + pending_size && !FIN ){
+  // cout << "window size: " << window_size<< endl;
+  // cout << "cur capacity: " << cur_capacity << endl;
+  while (cur_capacity > sequence_number_in_flight && !FIN ){
     uint16_t payload_size = TCPConfig::MAX_PAYLOAD_SIZE;
-    if (cur_capacity < payload_size){
-      payload_size = cur_capacity;
+    if (cur_capacity - sequence_number_in_flight < payload_size){
+      payload_size = cur_capacity - sequence_number_in_flight;
     }
+    cout << "payload size"<< payload_size << endl; 
     TCPSenderMessage seg;
     //if no SYN, add isn to syn
     if (!SYN){
-      cout << "set SYN" << endl;
+      // cout << "set SYN" << endl;
       seg.SYN = true;
       cout << seg.SYN << endl;
       SYN = true;
@@ -77,9 +78,12 @@ void TCPSender::push( Reader& outbound_stream )
     if (seg.sequence_length() == 0){
       return;
     }
-    pending_seg_.push(seg);
-    next_ackno += payload_size;
-    pending_size += seg.sequence_length();
+    pending_seg_.push_back(seg);
+    // next_ackno += seg.sequence_length();
+    if (!is_running){
+      start_timer();
+    }
+    sequence_number_in_flight += seg.sequence_length();
   }
 }
 
@@ -99,19 +103,32 @@ void TCPSender::receive( const TCPReceiverMessage& msg )
     return;
   }
   uint64_t abs_ackno = msg.ackno->unwrap(isn_, next_ackno);
-  cout << "abs ackno" << abs_ackno << endl;
-  cout << "next ackno" << abs_ackno <<endl;
+
   if (abs_ackno > next_ackno){
     return;
   }
-  // next_ackno = abs_ackno;
+
+  // cout << "start new ack"<< endl;
+  // cout << "abs ackno: " << abs_ackno << endl;
+  // cout << "next ackno: " << abs_ackno <<endl;
+  // cout << "outstanding q len: " << outstanding_seg_.size() << endl;
   window_size = msg.window_size;
-  while (!outstanding_seg_.empty() && outstanding_seg_.front().seqno.unwrap(isn_, next_ackno) <= next_ackno){
-    cout << "drop seg that have been acked" << endl;
-    sequence_number_in_flight -= outstanding_seg_.front().sequence_length();
-    outstanding_seg_.pop();
-    if(is_running){
-      end_timer();
+  while (!outstanding_seg_.empty()){
+    TCPSenderMessage seg = outstanding_seg_.front();
+    cout << "cur ackno: " << seg.seqno.unwrap(isn_, next_ackno) <<endl;
+    if (seg.seqno.unwrap(isn_, next_ackno) < abs_ackno){
+      // cout << "drop seg" << endl;
+      // cout << "seq length: " << seg.sequence_length() << endl;
+      // cout << "in flight: " << sequence_number_in_flight << endl;
+      sequence_number_in_flight -= (seg.sequence_length());
+      outstanding_seg_.pop_front();
+      cout << "outstanding q len: " << outstanding_seg_.size() << endl;
+      if(is_running){
+        end_timer();
+      }     
+    }else{
+      cout << "end pop" << endl;
+      break;
     }
   }
   if (!outstanding_seg_.empty()){
@@ -125,12 +142,16 @@ void TCPSender::tick( const size_t ms_since_last_tick )
   // Your code here.
   if(is_running){
     update_timer(ms_since_last_tick);
+    cout << "current time" << current_time << endl;
   }else{
     start_timer();
   }
-  if (is_expire() && !pending_seg_.empty()){
+  if (is_expire() && !outstanding_seg_.empty()){
     //retransmit the ealiest
-    pending_seg_.push(outstanding_seg_.front());
+    cout << "expire" << endl;
+    pending_seg_.push_back(outstanding_seg_.front());
+    next_ackno -= outstanding_seg_.front().sequence_length();
+    outstanding_seg_.pop_front();
     if(window_size > 0){
       double_RTO();
       consecutive_retransmissions_cnt ++;
@@ -161,7 +182,9 @@ void TCPSender::double_RTO(){
 }
 
 bool TCPSender::is_expire(){
-  return initial_RTO_ms_ * cnt > current_time;
+  // cout << "cnt: " << cnt<< endl;
+  // cout << "rto: " << initial_RTO_ms_ * cnt << endl;
+  return initial_RTO_ms_ * cnt <= current_time;
 }
 
 void TCPSender::reset_timer(){
