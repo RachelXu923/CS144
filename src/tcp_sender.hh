@@ -42,7 +42,7 @@ private:
   std::deque<TCPSenderMessage> pending_seg_{};
   bool SYN = false;
   bool FIN = false;
-  uint16_t window_size = 0;
+  uint16_t window_size = 1;
   uint64_t next_ackno = 0;
   uint64_t sent_seqno = 0;
   uint64_t sequence_number_in_flight = 0;
