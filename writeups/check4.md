@@ -1,7 +1,7 @@
 Checkpoint 4 Writeup
 ====================
 
-My name: [your name here]
+My name: Zixuan Xu
 
 My SUNet ID: [your sunetid here]
 
