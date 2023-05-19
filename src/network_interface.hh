@@ -13,8 +13,10 @@
 #include <optional>
 #include <queue>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <map>
+#include <vector>
 
 // A "network interface" that connects IP (the internet layer, or network layer)
 // with Ethernet (the network access layer, or link layer).
@@ -45,13 +47,15 @@ private:
 
   // IP (known as Internet-layer or network-layer) address of the interface
   Address ip_address_;
-  std::unordered_map<uint32_t, std::pair<EthernetAddress, size_t>> ARP_table{};
-  std::queue<EthernetFrame> frames_out_{};
-  std::unordered_map<uint32_t, size_t> waiting_response_msg{};
-  std::list<std::pair<Address, InternetDatagram>> waiting_to_be_sent{};
+  std::unordered_map<uint32_t, std::pair<EthernetAddress, size_t>> arp_table{}; //map<Mac address, TTL>
+  std::queue<EthernetFrame> sent_frame{}; //queue of ethernet frames that has already be sent
+  std::unordered_map<uint32_t, size_t> wait_response_msg{}; //map<ip, TTL>: ARP request sent and is waiting for the ARP reply
+  //List<ip, Internet Datagram>: wait until we obtain the mac address for certain ip
+  std::list<std::pair<Address, InternetDatagram>> wait_to_be_sent_dgram{};
   size_t _timer=0;
+  //helper function to broadcast
   EthernetFrame broadcast_frame(uint32_t ip, EthernetAddress target_ethernet_address, EthernetAddress dst_address, uint16_t opcode);
-  bool Ethernet_Address_equal(EthernetAddress adr1, EthernetAddress adr2);
+  bool Ethernet_Address_equal(EthernetAddress adr1, EthernetAddress adr2);//helper function to compare two mac address
 
 public:
   // Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer)
