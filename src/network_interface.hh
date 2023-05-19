@@ -50,7 +50,7 @@ private:
   std::unordered_map<uint32_t, size_t> waiting_response_msg{};
   std::list<std::pair<Address, InternetDatagram>> waiting_to_be_sent{};
   size_t _timer=0;
-  EthernetFrame broadcast_frame(uint32_t ip);
+  EthernetFrame broadcast_frame(uint32_t ip, EthernetAddress target_ethernet_address, EthernetAddress dst_address, uint16_t opcode);
   bool Ethernet_Address_equal(EthernetAddress adr1, EthernetAddress adr2);
 
 public:
