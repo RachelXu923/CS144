@@ -1,15 +1,20 @@
 #pragma once
 
 #include "address.hh"
+#include "arp_message.hh"
 #include "ethernet_frame.hh"
+#include "ethernet_header.hh"
 #include "ipv4_datagram.hh"
 
+#include <cstddef>
+#include <cstdint>
 #include <iostream>
 #include <list>
 #include <optional>
 #include <queue>
 #include <unordered_map>
 #include <utility>
+#include <map>
 
 // A "network interface" that connects IP (the internet layer, or network layer)
 // with Ethernet (the network access layer, or link layer).
@@ -40,6 +45,13 @@ private:
 
   // IP (known as Internet-layer or network-layer) address of the interface
   Address ip_address_;
+  std::unordered_map<uint32_t, std::pair<EthernetAddress, size_t>> ARP_table{};
+  std::queue<EthernetFrame> frames_out_{};
+  std::unordered_map<uint32_t, size_t> waiting_response_msg{};
+  std::list<std::pair<Address, InternetDatagram>> waiting_to_be_sent{};
+  size_t _timer=0;
+  EthernetFrame broadcast_frame(uint32_t ip);
+  bool Ethernet_Address_equal(EthernetAddress adr1, EthernetAddress adr2);
 
 public:
   // Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer)
