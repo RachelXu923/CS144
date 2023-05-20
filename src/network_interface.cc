@@ -108,7 +108,7 @@ void NetworkInterface::tick( const size_t ms_since_last_tick )
 {
   _timer += ms_since_last_tick;
 
-  //delete the msg that has been sent for more than 30s
+  //delete the ip that has been sent for more than 30s
   for (auto it = arp_table.begin(); it != arp_table.end();) {
     if (_timer - (it->second).second >= 30 * 1000) {
         arp_table.erase(it++);
