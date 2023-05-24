@@ -57,15 +57,18 @@ class Router
   // The router's collection of network interfaces
   std::vector<AsyncNetworkInterface> interfaces_ {};
 
-  struct RouterItem{
+  //struct to save information of each entry in the routing table
+  struct Route{
     const uint32_t route_prefix;
     const uint8_t prefix_length;
     const std::optional<Address> next_hop;
     const size_t interface_num;
   };
 
-  std::list<RouterItem> routing_table{};
+  //list of route as routing table
+  std::list<Route> routing_table{}; 
 
+  //helper function to compare two ip adrress
   bool prefix_equal(uint32_t dst_ip, uint32_t route_prefix, uint8_t prefix_length);
 
 public:
