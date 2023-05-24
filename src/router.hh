@@ -66,7 +66,7 @@ class Router
 
   std::vector<RouterItem> routing_table{};
 
-  void match_datagram(InternetDatagram &datagram);
+  // void match_datagram(InternetDatagram &datagram);
   bool prefix_equal(uint32_t dst_ip, uint32_t route_prefix, uint8_t prefix_length);
 
 public:

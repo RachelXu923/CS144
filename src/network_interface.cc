@@ -134,9 +134,6 @@ optional<EthernetFrame> NetworkInterface::maybe_send()
   if (!sent_frame.empty()){
     output = sent_frame.front();
     sent_frame.pop();
-    cout <<"not empty" << endl;
-  }else{
-    cout <<"empty" << endl;
   }
   return output;
 }
